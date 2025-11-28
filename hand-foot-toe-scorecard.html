@@ -307,42 +307,184 @@
             background: white;
         }
 
-        .totals {
-            margin-top: 40px;
+        .score-game-section {
+            margin-top: 30px;
             padding: 25px;
+            text-align: center;
+        }
+
+        .score-game-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
             color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 12px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .totals h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.8em;
+        .score-game-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
-        .totals-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+        .score-game-btn:active {
+            transform: translateY(-1px);
         }
 
-        .team-total {
-            background: rgba(255,255,255,0.2);
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            border-radius: 8px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 2em;
+            color: #666;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .winner-announcement {
             text-align: center;
-            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
         }
 
-        .team-total h3 {
+        .winner-trophy {
+            font-size: 4em;
             margin-bottom: 10px;
-            font-size: 1.2em;
         }
 
-        .team-total .score {
+        .winner-title {
+            font-size: 2em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .winner-name {
             font-size: 2.5em;
             font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .winner-score {
+            font-size: 1.5em;
+            color: #666;
+        }
+
+        .scores-divider {
+            height: 2px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 30px 0;
+        }
+
+        .final-scores-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .score-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .score-item.first {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-left-width: 6px;
+        }
+
+        .score-item-rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 15px;
+        }
+
+        .score-item-name {
+            flex: 1;
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .score-item-score {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
         }
 
         @media (max-width: 768px) {
@@ -358,8 +500,25 @@
                 grid-template-columns: 1fr;
             }
 
-            .totals-grid {
-                grid-template-columns: 1fr;
+            .winner-trophy {
+                font-size: 3em;
+            }
+
+            .winner-name {
+                font-size: 2em;
+            }
+
+            .winner-score {
+                font-size: 1.2em;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+
+            .score-game-btn {
+                font-size: 1.1em;
+                padding: 15px 40px;
             }
 
             .team-names {
@@ -432,10 +591,28 @@
             <!-- Hands will be dynamically generated here -->
         </div>
 
-        <div class="totals">
-            <h2>Grand Totals</h2>
-            <div class="totals-grid" id="grandTotalsContainer">
-                <!-- Grand totals will be dynamically generated -->
+        <div class="score-game-section">
+            <button class="score-game-btn" onclick="showGameResults()">🏆 Score Game</button>
+        </div>
+    </div>
+
+    <!-- Modal for game results -->
+    <div class="modal-overlay" id="gameResultsModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+
+            <div class="winner-announcement">
+                <div class="winner-trophy">🏆</div>
+                <div class="winner-title">Winner!</div>
+                <div class="winner-name" id="winnerName">Team Name</div>
+                <div class="winner-score" id="winnerScore">0 points</div>
+            </div>
+
+            <div class="scores-divider"></div>
+
+            <div class="final-scores-title">Final Scores</div>
+            <div class="score-list" id="scoreList">
+                <!-- Scores will be dynamically generated -->
             </div>
         </div>
     </div>
@@ -618,7 +795,6 @@
                 container.appendChild(createHandSection(hand));
             }
 
-            renderGrandTotals();
             updateAllTotals();
         }
 
@@ -782,23 +958,11 @@
                 handTotalElem.textContent = `Total: ${totalText}`;
             }
 
-            updateGrandTotals();
             saveData();
         }
 
-        // Render grand totals section
-        function renderGrandTotals() {
-            const container = document.getElementById('grandTotalsContainer');
-            container.innerHTML = teams.map(team => `
-                <div class="team-total">
-                    <h3 id="totalTeam${team.id}Name">${team.name}</h3>
-                    <div class="score" id="grandTotal${team.id}">0</div>
-                </div>
-            `).join('');
-        }
-
-        // Update grand totals
-        function updateGrandTotals() {
+        // Calculate grand totals for all teams
+        function calculateGrandTotals() {
             const grandTotals = {};
 
             teams.forEach(team => {
@@ -830,12 +994,46 @@
 
                     grandTotals[team.id] += handTotal;
                 }
-
-                const totalElem = document.getElementById(`grandTotal${team.id}`);
-                if (totalElem) {
-                    totalElem.textContent = grandTotals[team.id].toLocaleString();
-                }
             });
+
+            return grandTotals;
+        }
+
+        // Show game results modal
+        function showGameResults() {
+            const totals = calculateGrandTotals();
+
+            // Create sorted list of teams with scores
+            const sortedTeams = teams.map(team => ({
+                id: team.id,
+                name: team.name,
+                score: totals[team.id]
+            })).sort((a, b) => b.score - a.score);
+
+            // Display winner
+            const winner = sortedTeams[0];
+            document.getElementById('winnerName').textContent = winner.name;
+            document.getElementById('winnerScore').textContent = `${winner.score.toLocaleString()} points`;
+
+            // Display all scores ranked
+            const scoreList = document.getElementById('scoreList');
+            scoreList.innerHTML = sortedTeams.map((team, index) => `
+                <div class="score-item ${index === 0 ? 'first' : ''}">
+                    <div class="score-item-rank">#${index + 1}</div>
+                    <div class="score-item-name">${team.name}</div>
+                    <div class="score-item-score">${team.score.toLocaleString()}</div>
+                </div>
+            `).join('');
+
+            // Show modal
+            document.getElementById('gameResultsModal').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal(event) {
+            if (!event || event.target.classList.contains('modal-overlay') || event.target.classList.contains('modal-close')) {
+                document.getElementById('gameResultsModal').classList.remove('active');
+            }
         }
 
         // Update all totals
@@ -877,12 +1075,6 @@
                             option.text = team.name;
                         }
                     }
-                }
-
-                // Update total headers
-                const totalNameElem = document.getElementById(`totalTeam${team.id}Name`);
-                if (totalNameElem) {
-                    totalNameElem.textContent = team.name;
                 }
             });
         }
