@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand-Foot-Toe Scorecard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .team-names {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .team-names input {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1em;
+            width: 150px;
+        }
+
+        .reset-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .reset-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .hand-section {
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .hand-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hand-total {
+            font-size: 0.9em;
+            opacity: 0.95;
+        }
+
+        .hand-body {
+            padding: 20px;
+        }
+
+        .scoring-grid {
+            display: grid;
+            grid-template-columns: 200px repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .grid-header {
+            font-weight: bold;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .row-label {
+            font-weight: 600;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 1em;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group .points {
+            background: #e7f3ff;
+            font-weight: bold;
+            color: #0066cc;
+            border: 2px solid #b3d9ff;
+        }
+
+        .gone-out-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff8e1;
+            border-radius: 8px;
+            border: 2px solid #ffd54f;
+        }
+
+        .gone-out-section label {
+            font-weight: bold;
+            margin-right: 15px;
+            color: #f57c00;
+        }
+
+        .gone-out-section select {
+            padding: 8px 15px;
+            border: 2px solid #ffd54f;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+            background: white;
+        }
+
+        .totals {
+            margin-top: 40px;
+            padding: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .totals h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .totals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .team-total {
+            background: rgba(255,255,255,0.2);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .team-total h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .team-total .score {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .scoring-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .totals-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-names {
+                width: 100%;
+            }
+
+            .team-names input {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🃏 Hand-Foot-Toe Scorecard</h1>
+            <p>Track your game scores with ease</p>
+        </div>
+
+        <div class="controls">
+            <div class="team-names">
+                <input type="text" id="team1Name" value="Team 1" placeholder="Team 1 Name">
+                <input type="text" id="team2Name" value="Team 2" placeholder="Team 2 Name">
+                <input type="text" id="team3Name" value="Team 3" placeholder="Team 3 Name">
+            </div>
+            <button class="reset-btn" onclick="resetScorecard()">🔄 Reset Scorecard</button>
+        </div>
+
+        <div class="content" id="handsContainer">
+            <!-- Hands will be dynamically generated here -->
+        </div>
+
+        <div class="totals">
+            <h2>Grand Totals</h2>
+            <div class="totals-grid">
+                <div class="team-total">
+                    <h3 id="totalTeam1Name">Team 1</h3>
+                    <div class="score" id="grandTotal1">0</div>
+                </div>
+                <div class="team-total">
+                    <h3 id="totalTeam2Name">Team 2</h3>
+                    <div class="score" id="grandTotal2">0</div>
+                </div>
+                <div class="team-total">
+                    <h3 id="totalTeam3Name">Team 3</h3>
+                    <div class="score" id="grandTotal3">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Scoring constants
+        const POINTS = {
+            CLEAN_BOOK: 500,
+            DIRTY_BOOK: 300,
+            BOOK_OF_SEVENS: 5000,
+            BOOK_OF_FIVES: 3000,
+            BOOK_OF_WILDS: 2500,
+            FIRST_OUT: 200
+        };
+
+        const NUM_HANDS = 4;
+        let teamNames = ['Team 1', 'Team 2', 'Team 3'];
+
+        // Initialize the scorecard
+        function initializeScorecard() {
+            const container = document.getElementById('handsContainer');
+            container.innerHTML = '';
+
+            for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                container.appendChild(createHandSection(hand));
+            }
+
+            updateAllTotals();
+        }
+
+        // Create a hand section
+        function createHandSection(handNum) {
+            const section = document.createElement('div');
+            section.className = 'hand-section';
+            section.innerHTML = `
+                <div class="hand-header">
+                    <span>Hand ${handNum}</span>
+                    <span class="hand-total" id="handTotal${handNum}">Total: 0 / 0 / 0</span>
+                </div>
+                <div class="hand-body">
+                    <div class="scoring-grid">
+                        <div class="grid-header">Category</div>
+                        <div class="grid-header" id="header1-${handNum}">Team 1</div>
+                        <div class="grid-header" id="header2-${handNum}">Team 2</div>
+                        <div class="grid-header" id="header3-${handNum}">Team 3</div>
+
+                        <div class="row-label">7's Books</div>
+                        ${createInputGroup(handNum, 'sevens', 1)}
+                        ${createInputGroup(handNum, 'sevens', 2)}
+                        ${createInputGroup(handNum, 'sevens', 3)}
+
+                        <div class="row-label">5's Books</div>
+                        ${createInputGroup(handNum, 'fives', 1)}
+                        ${createInputGroup(handNum, 'fives', 2)}
+                        ${createInputGroup(handNum, 'fives', 3)}
+
+                        <div class="row-label">Wilds Books</div>
+                        ${createInputGroup(handNum, 'wilds', 1)}
+                        ${createInputGroup(handNum, 'wilds', 2)}
+                        ${createInputGroup(handNum, 'wilds', 3)}
+
+                        <div class="row-label">Clean Books</div>
+                        ${createInputGroup(handNum, 'clean', 1)}
+                        ${createInputGroup(handNum, 'clean', 2)}
+                        ${createInputGroup(handNum, 'clean', 3)}
+
+                        <div class="row-label">Dirty Books</div>
+                        ${createInputGroup(handNum, 'dirty', 1)}
+                        ${createInputGroup(handNum, 'dirty', 2)}
+                        ${createInputGroup(handNum, 'dirty', 3)}
+
+                        <div class="row-label">Card Points</div>
+                        ${createInputGroup(handNum, 'cardPoints', 1)}
+                        ${createInputGroup(handNum, 'cardPoints', 2)}
+                        ${createInputGroup(handNum, 'cardPoints', 3)}
+
+                        <div class="row-label">Card Deductions</div>
+                        ${createInputGroup(handNum, 'deductions', 1)}
+                        ${createInputGroup(handNum, 'deductions', 2)}
+                        ${createInputGroup(handNum, 'deductions', 3)}
+                    </div>
+
+                    <div class="gone-out-section">
+                        <label for="goneOut${handNum}">🏆 Team Gone Out First:</label>
+                        <select id="goneOut${handNum}" onchange="updateHandTotal(${handNum})">
+                            <option value="">None</option>
+                            <option value="1">Team 1</option>
+                            <option value="2">Team 2</option>
+                            <option value="3">Team 3</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            return section;
+        }
+
+        // Create input group for a category
+        function createInputGroup(hand, category, team) {
+            const isPoints = category === 'cardPoints' || category === 'deductions';
+            const inputClass = isPoints ? 'points' : '';
+            
+            return `
+                <div class="input-group">
+                    <input type="number" 
+                           id="hand${hand}_${category}_${team}" 
+                           class="${inputClass}"
+                           value="0"
+                           min="0"
+                           oninput="updateHandTotal(${hand})">
+                </div>
+            `;
+        }
+
+        // Calculate points for a specific booking type
+        function calculateBookingPoints(hand, type, team) {
+            const count = parseInt(document.getElementById(`hand${hand}_${type}_${team}`).value) || 0;
+            let points = 0;
+
+            switch(type) {
+                case 'sevens':
+                    points = count * POINTS.BOOK_OF_SEVENS;
+                    break;
+                case 'fives':
+                    points = count * POINTS.BOOK_OF_FIVES;
+                    break;
+                case 'wilds':
+                    points = count * POINTS.BOOK_OF_WILDS;
+                    break;
+                case 'clean':
+                    points = count * POINTS.CLEAN_BOOK;
+                    break;
+                case 'dirty':
+                    points = count * POINTS.DIRTY_BOOK;
+                    break;
+            }
+
+            return points;
+        }
+
+        // Update totals for a specific hand
+        function updateHandTotal(hand) {
+            const teams = [1, 2, 3];
+            const totals = [0, 0, 0];
+
+            teams.forEach((team, idx) => {
+                // Calculate booking points
+                totals[idx] += calculateBookingPoints(hand, 'sevens', team);
+                totals[idx] += calculateBookingPoints(hand, 'fives', team);
+                totals[idx] += calculateBookingPoints(hand, 'wilds', team);
+                totals[idx] += calculateBookingPoints(hand, 'clean', team);
+                totals[idx] += calculateBookingPoints(hand, 'dirty', team);
+
+                // Add card points
+                const cardPoints = parseInt(document.getElementById(`hand${hand}_cardPoints_${team}`).value) || 0;
+                totals[idx] += cardPoints;
+
+                // Subtract deductions
+                const deductions = parseInt(document.getElementById(`hand${hand}_deductions_${team}`).value) || 0;
+                totals[idx] -= deductions;
+
+                // Add first out bonus
+                const goneOut = document.getElementById(`goneOut${hand}`).value;
+                if (goneOut == team) {
+                    totals[idx] += POINTS.FIRST_OUT;
+                }
+            });
+
+            // Update hand total display
+            document.getElementById(`handTotal${hand}`).textContent = 
+                `Total: ${totals[0].toLocaleString()} / ${totals[1].toLocaleString()} / ${totals[2].toLocaleString()}`;
+
+            updateGrandTotals();
+        }
+
+        // Update grand totals
+        function updateGrandTotals() {
+            const grandTotals = [0, 0, 0];
+
+            for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                for (let team = 1; team <= 3; team++) {
+                    let handTotal = 0;
+
+                    // Calculate booking points
+                    handTotal += calculateBookingPoints(hand, 'sevens', team);
+                    handTotal += calculateBookingPoints(hand, 'fives', team);
+                    handTotal += calculateBookingPoints(hand, 'wilds', team);
+                    handTotal += calculateBookingPoints(hand, 'clean', team);
+                    handTotal += calculateBookingPoints(hand, 'dirty', team);
+
+                    // Add card points
+                    const cardPoints = parseInt(document.getElementById(`hand${hand}_cardPoints_${team}`).value) || 0;
+                    handTotal += cardPoints;
+
+                    // Subtract deductions
+                    const deductions = parseInt(document.getElementById(`hand${hand}_deductions_${team}`).value) || 0;
+                    handTotal -= deductions;
+
+                    // Add first out bonus
+                    const goneOut = document.getElementById(`goneOut${hand}`).value;
+                    if (goneOut == team) {
+                        handTotal += POINTS.FIRST_OUT;
+                    }
+
+                    grandTotals[team - 1] += handTotal;
+                }
+            }
+
+            document.getElementById('grandTotal1').textContent = grandTotals[0].toLocaleString();
+            document.getElementById('grandTotal2').textContent = grandTotals[1].toLocaleString();
+            document.getElementById('grandTotal3').textContent = grandTotals[2].toLocaleString();
+        }
+
+        // Update all totals
+        function updateAllTotals() {
+            for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                updateHandTotal(hand);
+            }
+        }
+
+        // Reset the entire scorecard
+        function resetScorecard() {
+            if (confirm('Are you sure you want to reset the entire scorecard? This cannot be undone.')) {
+                initializeScorecard();
+            }
+        }
+
+        // Update team names
+        function updateTeamNames() {
+            const team1 = document.getElementById('team1Name').value || 'Team 1';
+            const team2 = document.getElementById('team2Name').value || 'Team 2';
+            const team3 = document.getElementById('team3Name').value || 'Team 3';
+
+            teamNames = [team1, team2, team3];
+
+            // Update headers
+            for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                document.getElementById(`header1-${hand}`).textContent = team1;
+                document.getElementById(`header2-${hand}`).textContent = team2;
+                document.getElementById(`header3-${hand}`).textContent = team3;
+
+                // Update gone out options
+                const select = document.getElementById(`goneOut${hand}`);
+                select.options[1].text = team1;
+                select.options[2].text = team2;
+                select.options[3].text = team3;
+            }
+
+            // Update total headers
+            document.getElementById('totalTeam1Name').textContent = team1;
+            document.getElementById('totalTeam2Name').textContent = team2;
+            document.getElementById('totalTeam3Name').textContent = team3;
+        }
+
+        // Event listeners for team name changes
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeScorecard();
+
+            document.getElementById('team1Name').addEventListener('input', updateTeamNames);
+            document.getElementById('team2Name').addEventListener('input', updateTeamNames);
+            document.getElementById('team3Name').addEventListener('input', updateTeamNames);
+        });
+    </script>
+</body>
+</html>
