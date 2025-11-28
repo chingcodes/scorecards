@@ -159,6 +159,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.3s;
+        }
+
+        .hand-header:hover {
+            background: linear-gradient(135deg, #7689f1 0%, #8356b3 100%);
+        }
+
+        .hand-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .collapse-icon {
+            font-size: 0.8em;
+            transition: transform 0.3s;
+        }
+
+        .hand-section.collapsed .collapse-icon {
+            transform: rotate(-90deg);
         }
 
         .hand-total {
@@ -168,6 +190,14 @@
 
         .hand-body {
             padding: 15px;
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+        }
+
+        .hand-section.collapsed .hand-body {
+            max-height: 0;
+            padding: 0 15px;
         }
 
         .teams-container {
@@ -175,6 +205,13 @@
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 15px;
             margin-bottom: 20px;
+        }
+
+        .card-separator {
+            margin: 15px 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #667eea, transparent);
+            opacity: 0.3;
         }
 
         .team-card {
@@ -234,6 +271,46 @@
             font-weight: bold;
             color: #0066cc;
             border: 2px solid #b3d9ff;
+            width: 90px;
+        }
+
+        .score-label-with-tooltip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: help;
+        }
+
+        .tooltip {
+            visibility: hidden;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 0;
+            background-color: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 20px;
+            border: 5px solid transparent;
+            border-top-color: #333;
+        }
+
+        .score-label-with-tooltip:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
         }
 
         .increment-btn {
@@ -548,10 +625,19 @@
                 font-size: 0.95em;
             }
 
+            .score-input.points {
+                width: 80px;
+            }
+
             .increment-btn {
                 width: 28px;
                 height: 28px;
                 font-size: 1em;
+            }
+
+            .tooltip {
+                font-size: 0.75em;
+                padding: 6px 10px;
             }
         }
 
@@ -802,6 +888,7 @@
         function createHandSection(handNum) {
             const section = document.createElement('div');
             section.className = 'hand-section';
+            section.id = `hand-section-${handNum}`;
 
             const teamCards = teams.map(team => createTeamCard(handNum, team.id, team.name)).join('');
             const goneOutOptions = teams.map(team =>
@@ -809,8 +896,11 @@
             ).join('');
 
             section.innerHTML = `
-                <div class="hand-header">
-                    <span>Hand ${handNum}</span>
+                <div class="hand-header" onclick="toggleHandCollapse(${handNum})">
+                    <div class="hand-header-left">
+                        <span class="collapse-icon">▼</span>
+                        <span>Hand ${handNum}</span>
+                    </div>
                     <span class="hand-total" id="handTotal${handNum}"></span>
                 </div>
                 <div class="hand-body">
@@ -830,11 +920,22 @@
             return section;
         }
 
+        // Toggle hand collapse/expand
+        function toggleHandCollapse(handNum) {
+            const section = document.getElementById(`hand-section-${handNum}`);
+            if (section) {
+                section.classList.toggle('collapsed');
+            }
+        }
+
         // Create a team card for a hand
         function createTeamCard(hand, teamId, teamName) {
-            const createBookRow = (label, category) => `
+            const createBookRow = (label, category, tooltip) => `
                 <div class="score-row">
-                    <div class="score-label">${label}</div>
+                    <div class="score-label-with-tooltip">
+                        <div class="score-label">${label}</div>
+                        <div class="tooltip">${tooltip}</div>
+                    </div>
                     <div class="score-input-group">
                         <button class="increment-btn decrement" onclick="adjustValue('hand${hand}_${category}_${teamId}', -1, ${hand})" type="button">−</button>
                         <input type="number"
@@ -842,20 +943,33 @@
                                class="score-input"
                                value="0"
                                min="0"
+                               step="1"
+                               pattern="[0-9]*"
+                               inputmode="numeric"
+                               onkeydown="allowOnlyNumbers(event)"
+                               onpaste="validateNumericPaste(event)"
                                oninput="updateHandTotal(${hand})">
                         <button class="increment-btn" onclick="adjustValue('hand${hand}_${category}_${teamId}', 1, ${hand})" type="button">+</button>
                     </div>
                 </div>
             `;
 
-            const createPointsRow = (label, category) => `
+            const createPointsRow = (label, category, tooltip) => `
                 <div class="score-row">
-                    <div class="score-label">${label}</div>
+                    <div class="score-label-with-tooltip">
+                        <div class="score-label">${label}</div>
+                        <div class="tooltip">${tooltip}</div>
+                    </div>
                     <input type="number"
                            id="hand${hand}_${category}_${teamId}"
                            class="score-input points"
                            value="0"
                            min="0"
+                           step="1"
+                           pattern="[0-9]*"
+                           inputmode="numeric"
+                           onkeydown="allowOnlyNumbers(event)"
+                           onpaste="validateNumericPaste(event)"
                            oninput="updateHandTotal(${hand})">
                 </div>
             `;
@@ -864,17 +978,47 @@
                 <div class="team-card">
                     <div class="team-card-header" id="header${teamId}-${hand}">${teamName}</div>
 
-                    ${createBookRow("7's Books", 'sevens')}
-                    ${createBookRow("5's Books", 'fives')}
-                    ${createBookRow("Wilds Books", 'wilds')}
-                    ${createBookRow("Clean Books", 'clean')}
-                    ${createBookRow("Dirty Books", 'dirty')}
-                    ${createPointsRow("Card Points", 'cardPoints')}
-                    ${createPointsRow("Card Deductions", 'deductions')}
+                    ${createBookRow("7's Books", 'sevens', '7 of each rank (7-7-7-7-7-7-7) • 5,000 points')}
+                    ${createBookRow("5's Books", 'fives', '5 of each rank (5-5-5-5-5-5-5) • 3,000 points')}
+                    ${createBookRow("Wilds Books", 'wilds', '7 wild cards (Jokers or 2s) • 2,500 points')}
+                    ${createBookRow("Clean Books", 'clean', '7 natural cards (no wilds) • 500 points')}
+                    ${createBookRow("Dirty Books", 'dirty', '7 cards with wilds • 300 points')}
+
+                    <div class="card-separator"></div>
+
+                    ${createPointsRow("Card Points", 'cardPoints', 'Total point value of all cards played')}
+                    ${createPointsRow("Card Deductions", 'deductions', 'Point value of cards left in hand (subtract)')}
 
                     <div class="team-total-display" id="teamTotal${hand}_${teamId}">Total: 0</div>
                 </div>
             `;
+        }
+
+        // Only allow numeric input
+        function allowOnlyNumbers(event) {
+            // Allow: backspace, delete, tab, escape, enter
+            if ([8, 9, 27, 13, 46].indexOf(event.keyCode) !== -1 ||
+                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                (event.keyCode === 65 && event.ctrlKey === true) ||
+                (event.keyCode === 67 && event.ctrlKey === true) ||
+                (event.keyCode === 86 && event.ctrlKey === true) ||
+                (event.keyCode === 88 && event.ctrlKey === true) ||
+                // Allow: home, end, left, right
+                (event.keyCode >= 35 && event.keyCode <= 39)) {
+                return;
+            }
+            // Ensure that it is a number and stop the keypress
+            if ((event.shiftKey || (event.keyCode < 48 || event.keyCode > 57)) && (event.keyCode < 96 || event.keyCode > 105)) {
+                event.preventDefault();
+            }
+        }
+
+        // Validate input on paste
+        function validateNumericPaste(event) {
+            const pasteData = (event.clipboardData || window.clipboardData).getData('text');
+            if (!/^\d+$/.test(pasteData)) {
+                event.preventDefault();
+            }
         }
 
         // Adjust value using +/- buttons
