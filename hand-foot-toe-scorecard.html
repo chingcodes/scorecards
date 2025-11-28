@@ -301,6 +301,108 @@
 
         const NUM_HANDS = 4;
         let teamNames = ['Team 1', 'Team 2', 'Team 3'];
+        const STORAGE_KEY = 'handFootToeScorecard';
+
+        // Save data to localStorage
+        function saveData() {
+            const data = {
+                teamNames: {
+                    team1: document.getElementById('team1Name').value,
+                    team2: document.getElementById('team2Name').value,
+                    team3: document.getElementById('team3Name').value
+                },
+                hands: {}
+            };
+
+            // Save all hand data
+            for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                data.hands[hand] = {
+                    sevens: [
+                        document.getElementById(`hand${hand}_sevens_1`).value,
+                        document.getElementById(`hand${hand}_sevens_2`).value,
+                        document.getElementById(`hand${hand}_sevens_3`).value
+                    ],
+                    fives: [
+                        document.getElementById(`hand${hand}_fives_1`).value,
+                        document.getElementById(`hand${hand}_fives_2`).value,
+                        document.getElementById(`hand${hand}_fives_3`).value
+                    ],
+                    wilds: [
+                        document.getElementById(`hand${hand}_wilds_1`).value,
+                        document.getElementById(`hand${hand}_wilds_2`).value,
+                        document.getElementById(`hand${hand}_wilds_3`).value
+                    ],
+                    clean: [
+                        document.getElementById(`hand${hand}_clean_1`).value,
+                        document.getElementById(`hand${hand}_clean_2`).value,
+                        document.getElementById(`hand${hand}_clean_3`).value
+                    ],
+                    dirty: [
+                        document.getElementById(`hand${hand}_dirty_1`).value,
+                        document.getElementById(`hand${hand}_dirty_2`).value,
+                        document.getElementById(`hand${hand}_dirty_3`).value
+                    ],
+                    cardPoints: [
+                        document.getElementById(`hand${hand}_cardPoints_1`).value,
+                        document.getElementById(`hand${hand}_cardPoints_2`).value,
+                        document.getElementById(`hand${hand}_cardPoints_3`).value
+                    ],
+                    deductions: [
+                        document.getElementById(`hand${hand}_deductions_1`).value,
+                        document.getElementById(`hand${hand}_deductions_2`).value,
+                        document.getElementById(`hand${hand}_deductions_3`).value
+                    ],
+                    goneOut: document.getElementById(`goneOut${hand}`).value
+                };
+            }
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (!savedData) return false;
+
+            try {
+                const data = JSON.parse(savedData);
+
+                // Restore team names
+                document.getElementById('team1Name').value = data.teamNames.team1;
+                document.getElementById('team2Name').value = data.teamNames.team2;
+                document.getElementById('team3Name').value = data.teamNames.team3;
+
+                // Restore all hand data
+                for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                    if (data.hands[hand]) {
+                        const handData = data.hands[hand];
+
+                        // Restore each category
+                        ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'cardPoints', 'deductions'].forEach(category => {
+                            if (handData[category]) {
+                                for (let team = 1; team <= 3; team++) {
+                                    const elem = document.getElementById(`hand${hand}_${category}_${team}`);
+                                    if (elem) elem.value = handData[category][team - 1];
+                                }
+                            }
+                        });
+
+                        // Restore gone out
+                        const goneOutElem = document.getElementById(`goneOut${hand}`);
+                        if (goneOutElem && handData.goneOut) {
+                            goneOutElem.value = handData.goneOut;
+                        }
+                    }
+                }
+
+                updateTeamNames();
+                updateAllTotals();
+                return true;
+            } catch (e) {
+                console.error('Error loading saved data:', e);
+                return false;
+            }
+        }
 
         // Initialize the scorecard
         function initializeScorecard() {
@@ -311,7 +413,10 @@
                 container.appendChild(createHandSection(hand));
             }
 
-            updateAllTotals();
+            // Try to load saved data, otherwise update totals
+            if (!loadData()) {
+                updateAllTotals();
+            }
         }
 
         // Create a hand section
@@ -452,10 +557,11 @@
             });
 
             // Update hand total display
-            document.getElementById(`handTotal${hand}`).textContent = 
+            document.getElementById(`handTotal${hand}`).textContent =
                 `Total: ${totals[0].toLocaleString()} / ${totals[1].toLocaleString()} / ${totals[2].toLocaleString()}`;
 
             updateGrandTotals();
+            saveData();
         }
 
         // Update grand totals
@@ -506,6 +612,10 @@
         // Reset the entire scorecard
         function resetScorecard() {
             if (confirm('Are you sure you want to reset the entire scorecard? This cannot be undone.')) {
+                localStorage.removeItem(STORAGE_KEY);
+                document.getElementById('team1Name').value = 'Team 1';
+                document.getElementById('team2Name').value = 'Team 2';
+                document.getElementById('team3Name').value = 'Team 3';
                 initializeScorecard();
             }
         }
@@ -535,6 +645,8 @@
             document.getElementById('totalTeam1Name').textContent = team1;
             document.getElementById('totalTeam2Name').textContent = team2;
             document.getElementById('totalTeam3Name').textContent = team3;
+
+            saveData();
         }
 
         // Event listeners for team name changes
