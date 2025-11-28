@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Score Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .scorecards {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .scorecard-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 25px;
+            text-decoration: none;
+            color: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .scorecard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .scorecard-card h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .scorecard-card p {
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .footer {
+            padding: 20px 30px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>HTML Score Cards</h1>
+            <p>A collection of digital scorecards for card games</p>
+        </div>
+
+        <div class="content">
+            <h2>Available Scorecards</h2>
+            <div class="scorecards">
+                <a href="hand-foot-toe-scorecard.html" class="scorecard-card">
+                    <h2>Hand, Foot & Toe Scorecard</h2>
+                    <p>Track scores for the Hand, Foot & Toe card game with an easy-to-use digital scorecard.</p>
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Open source project - <a href="https://github.com/chingcodes/html-scorecards" target="_blank">View on GitHub</a></p>
+        </div>
+    </div>
+</body>
+</html>
