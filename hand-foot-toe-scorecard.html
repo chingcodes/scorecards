@@ -208,9 +208,15 @@
             color: #495057;
         }
 
+        .score-input-group {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
         .score-input {
-            width: 80px;
-            padding: 8px;
+            width: 60px;
+            padding: 8px 4px;
             border: 2px solid #dee2e6;
             border-radius: 5px;
             font-size: 1em;
@@ -228,6 +234,44 @@
             font-weight: bold;
             color: #0066cc;
             border: 2px solid #b3d9ff;
+        }
+
+        .increment-btn {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 5px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .increment-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .increment-btn:active {
+            transform: scale(0.95);
+        }
+
+        .increment-btn.decrement {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+
+        .increment-btn.decrement:hover {
+            background: #dc3545;
+            color: white;
         }
 
         .team-total-display {
@@ -340,9 +384,15 @@
             }
 
             .score-input {
-                width: 70px;
-                padding: 6px;
+                width: 50px;
+                padding: 6px 2px;
                 font-size: 0.95em;
+            }
+
+            .increment-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 1em;
             }
         }
 
@@ -606,83 +656,60 @@
 
         // Create a team card for a hand
         function createTeamCard(hand, teamId, teamName) {
+            const createBookRow = (label, category) => `
+                <div class="score-row">
+                    <div class="score-label">${label}</div>
+                    <div class="score-input-group">
+                        <button class="increment-btn decrement" onclick="adjustValue('hand${hand}_${category}_${teamId}', -1, ${hand})" type="button">−</button>
+                        <input type="number"
+                               id="hand${hand}_${category}_${teamId}"
+                               class="score-input"
+                               value="0"
+                               min="0"
+                               oninput="updateHandTotal(${hand})">
+                        <button class="increment-btn" onclick="adjustValue('hand${hand}_${category}_${teamId}', 1, ${hand})" type="button">+</button>
+                    </div>
+                </div>
+            `;
+
+            const createPointsRow = (label, category) => `
+                <div class="score-row">
+                    <div class="score-label">${label}</div>
+                    <input type="number"
+                           id="hand${hand}_${category}_${teamId}"
+                           class="score-input points"
+                           value="0"
+                           min="0"
+                           oninput="updateHandTotal(${hand})">
+                </div>
+            `;
+
             return `
                 <div class="team-card">
                     <div class="team-card-header" id="header${teamId}-${hand}">${teamName}</div>
 
-                    <div class="score-row">
-                        <div class="score-label">7's Books</div>
-                        <input type="number"
-                               id="hand${hand}_sevens_${teamId}"
-                               class="score-input"
-                               value="0"
-                               min="0"
-                               oninput="updateHandTotal(${hand})">
-                    </div>
-
-                    <div class="score-row">
-                        <div class="score-label">5's Books</div>
-                        <input type="number"
-                               id="hand${hand}_fives_${teamId}"
-                               class="score-input"
-                               value="0"
-                               min="0"
-                               oninput="updateHandTotal(${hand})">
-                    </div>
-
-                    <div class="score-row">
-                        <div class="score-label">Wilds Books</div>
-                        <input type="number"
-                               id="hand${hand}_wilds_${teamId}"
-                               class="score-input"
-                               value="0"
-                               min="0"
-                               oninput="updateHandTotal(${hand})">
-                    </div>
-
-                    <div class="score-row">
-                        <div class="score-label">Clean Books</div>
-                        <input type="number"
-                               id="hand${hand}_clean_${teamId}"
-                               class="score-input"
-                               value="0"
-                               min="0"
-                               oninput="updateHandTotal(${hand})">
-                    </div>
-
-                    <div class="score-row">
-                        <div class="score-label">Dirty Books</div>
-                        <input type="number"
-                               id="hand${hand}_dirty_${teamId}"
-                               class="score-input"
-                               value="0"
-                               min="0"
-                               oninput="updateHandTotal(${hand})">
-                    </div>
-
-                    <div class="score-row">
-                        <div class="score-label">Card Points</div>
-                        <input type="number"
-                               id="hand${hand}_cardPoints_${teamId}"
-                               class="score-input points"
-                               value="0"
-                               min="0"
-                               oninput="updateHandTotal(${hand})">
-                    </div>
-
-                    <div class="score-row">
-                        <div class="score-label">Card Deductions</div>
-                        <input type="number"
-                               id="hand${hand}_deductions_${teamId}"
-                               class="score-input points"
-                               value="0"
-                               min="0"
-                               oninput="updateHandTotal(${hand})">
-                    </div>
+                    ${createBookRow("7's Books", 'sevens')}
+                    ${createBookRow("5's Books", 'fives')}
+                    ${createBookRow("Wilds Books", 'wilds')}
+                    ${createBookRow("Clean Books", 'clean')}
+                    ${createBookRow("Dirty Books", 'dirty')}
+                    ${createPointsRow("Card Points", 'cardPoints')}
+                    ${createPointsRow("Card Deductions", 'deductions')}
 
                     <div class="team-total-display" id="teamTotal${hand}_${teamId}">Total: 0</div>
                 </div>
             `;
+        }
+
+        // Adjust value using +/- buttons
+        function adjustValue(elementId, delta, hand) {
+            const elem = document.getElementById(elementId);
+            if (!elem) return;
+
+            const currentValue = parseInt(elem.value) || 0;
+            const newValue = Math.max(0, currentValue + delta);
+            elem.value = newValue;
+            updateHandTotal(hand);
         }
 
         // Calculate points for a specific booking type
