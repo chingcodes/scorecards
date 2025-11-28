@@ -48,17 +48,34 @@
             padding: 20px 30px;
             background: #f8f9fa;
             border-bottom: 2px solid #e9ecef;
+        }
+
+        .controls-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .team-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         .team-names {
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .team-input-group {
+            display: flex;
+            gap: 5px;
+            align-items: center;
         }
 
         .team-names input {
@@ -67,6 +84,41 @@
             border-radius: 8px;
             font-size: 1em;
             width: 150px;
+        }
+
+        .remove-team-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .remove-team-btn:hover {
+            background: #c82333;
+            transform: scale(1.05);
+        }
+
+        .add-team-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .add-team-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
         }
 
         .reset-btn {
@@ -315,12 +367,15 @@
         </div>
 
         <div class="controls">
-            <div class="team-names">
-                <input type="text" id="team1Name" value="Team 1" placeholder="Team 1 Name">
-                <input type="text" id="team2Name" value="Team 2" placeholder="Team 2 Name">
-                <input type="text" id="team3Name" value="Team 3" placeholder="Team 3 Name">
+            <div class="controls-top">
+                <div class="team-controls">
+                    <button class="add-team-btn" onclick="addTeam()">➕ Add Team</button>
+                </div>
+                <button class="reset-btn" onclick="resetScorecard()">🔄 Reset Scorecard</button>
             </div>
-            <button class="reset-btn" onclick="resetScorecard()">🔄 Reset Scorecard</button>
+            <div class="team-names" id="teamNamesContainer">
+                <!-- Team inputs will be dynamically generated -->
+            </div>
         </div>
 
         <div class="content" id="handsContainer">
@@ -329,19 +384,8 @@
 
         <div class="totals">
             <h2>Grand Totals</h2>
-            <div class="totals-grid">
-                <div class="team-total">
-                    <h3 id="totalTeam1Name">Team 1</h3>
-                    <div class="score" id="grandTotal1">0</div>
-                </div>
-                <div class="team-total">
-                    <h3 id="totalTeam2Name">Team 2</h3>
-                    <div class="score" id="grandTotal2">0</div>
-                </div>
-                <div class="team-total">
-                    <h3 id="totalTeam3Name">Team 3</h3>
-                    <div class="score" id="grandTotal3">0</div>
-                </div>
+            <div class="totals-grid" id="grandTotalsContainer">
+                <!-- Grand totals will be dynamically generated -->
             </div>
         </div>
     </div>
@@ -358,60 +402,39 @@
         };
 
         const NUM_HANDS = 4;
-        let teamNames = ['Team 1', 'Team 2', 'Team 3'];
+        let teams = [
+            { id: 1, name: 'Team 1' },
+            { id: 2, name: 'Team 2' },
+            { id: 3, name: 'Team 3' }
+        ];
+        let nextTeamId = 4;
         const STORAGE_KEY = 'handFootToeScorecard';
 
         // Save data to localStorage
         function saveData() {
             const data = {
-                teamNames: {
-                    team1: document.getElementById('team1Name').value,
-                    team2: document.getElementById('team2Name').value,
-                    team3: document.getElementById('team3Name').value
-                },
+                teams: teams.map(team => ({
+                    id: team.id,
+                    name: document.getElementById(`team${team.id}Name`)?.value || team.name
+                })),
                 hands: {}
             };
 
             // Save all hand data
             for (let hand = 1; hand <= NUM_HANDS; hand++) {
-                data.hands[hand] = {
-                    sevens: [
-                        document.getElementById(`hand${hand}_sevens_1`).value,
-                        document.getElementById(`hand${hand}_sevens_2`).value,
-                        document.getElementById(`hand${hand}_sevens_3`).value
-                    ],
-                    fives: [
-                        document.getElementById(`hand${hand}_fives_1`).value,
-                        document.getElementById(`hand${hand}_fives_2`).value,
-                        document.getElementById(`hand${hand}_fives_3`).value
-                    ],
-                    wilds: [
-                        document.getElementById(`hand${hand}_wilds_1`).value,
-                        document.getElementById(`hand${hand}_wilds_2`).value,
-                        document.getElementById(`hand${hand}_wilds_3`).value
-                    ],
-                    clean: [
-                        document.getElementById(`hand${hand}_clean_1`).value,
-                        document.getElementById(`hand${hand}_clean_2`).value,
-                        document.getElementById(`hand${hand}_clean_3`).value
-                    ],
-                    dirty: [
-                        document.getElementById(`hand${hand}_dirty_1`).value,
-                        document.getElementById(`hand${hand}_dirty_2`).value,
-                        document.getElementById(`hand${hand}_dirty_3`).value
-                    ],
-                    cardPoints: [
-                        document.getElementById(`hand${hand}_cardPoints_1`).value,
-                        document.getElementById(`hand${hand}_cardPoints_2`).value,
-                        document.getElementById(`hand${hand}_cardPoints_3`).value
-                    ],
-                    deductions: [
-                        document.getElementById(`hand${hand}_deductions_1`).value,
-                        document.getElementById(`hand${hand}_deductions_2`).value,
-                        document.getElementById(`hand${hand}_deductions_3`).value
-                    ],
-                    goneOut: document.getElementById(`goneOut${hand}`).value
-                };
+                data.hands[hand] = {};
+
+                teams.forEach(team => {
+                    const categories = ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'cardPoints', 'deductions'];
+                    data.hands[hand][team.id] = {};
+
+                    categories.forEach(category => {
+                        const elem = document.getElementById(`hand${hand}_${category}_${team.id}`);
+                        data.hands[hand][team.id][category] = elem?.value || '0';
+                    });
+                });
+
+                data.hands[hand].goneOut = document.getElementById(`goneOut${hand}`)?.value || '';
             }
 
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -425,23 +448,29 @@
             try {
                 const data = JSON.parse(savedData);
 
-                // Restore team names
-                document.getElementById('team1Name').value = data.teamNames.team1;
-                document.getElementById('team2Name').value = data.teamNames.team2;
-                document.getElementById('team3Name').value = data.teamNames.team3;
+                // Restore teams
+                if (data.teams && data.teams.length > 0) {
+                    teams = data.teams;
+                    nextTeamId = Math.max(...teams.map(t => t.id)) + 1;
+                }
+
+                // Render team inputs
+                renderTeamInputs();
 
                 // Restore all hand data
                 for (let hand = 1; hand <= NUM_HANDS; hand++) {
-                    if (data.hands[hand]) {
+                    if (data.hands && data.hands[hand]) {
                         const handData = data.hands[hand];
 
-                        // Restore each category
-                        ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'cardPoints', 'deductions'].forEach(category => {
-                            if (handData[category]) {
-                                for (let team = 1; team <= 3; team++) {
-                                    const elem = document.getElementById(`hand${hand}_${category}_${team}`);
-                                    if (elem) elem.value = handData[category][team - 1];
-                                }
+                        teams.forEach(team => {
+                            if (handData[team.id]) {
+                                const categories = ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'cardPoints', 'deductions'];
+                                categories.forEach(category => {
+                                    const elem = document.getElementById(`hand${hand}_${category}_${team.id}`);
+                                    if (elem && handData[team.id][category] !== undefined) {
+                                        elem.value = handData[team.id][category];
+                                    }
+                                });
                             }
                         });
 
@@ -453,7 +482,6 @@
                     }
                 }
 
-                updateTeamNames();
                 updateAllTotals();
                 return true;
             } catch (e) {
@@ -462,14 +490,68 @@
             }
         }
 
-        // Initialize the scorecard
-        function initializeScorecard() {
-            const container = document.getElementById('handsContainer');
+        // Render team input fields
+        function renderTeamInputs() {
+            const container = document.getElementById('teamNamesContainer');
             container.innerHTML = '';
 
-            for (let hand = 1; hand <= NUM_HANDS; hand++) {
-                container.appendChild(createHandSection(hand));
+            teams.forEach(team => {
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'team-input-group';
+                inputGroup.innerHTML = `
+                    <input type="text"
+                           id="team${team.id}Name"
+                           value="${team.name}"
+                           placeholder="Team ${team.id} Name"
+                           oninput="updateTeamName(${team.id})">
+                    ${teams.length > 1 ? `<button class="remove-team-btn" onclick="removeTeam(${team.id})">✕</button>` : ''}
+                `;
+                container.appendChild(inputGroup);
+            });
+        }
+
+        // Add a new team
+        function addTeam() {
+            const newTeam = {
+                id: nextTeamId++,
+                name: `Team ${teams.length + 1}`
+            };
+            teams.push(newTeam);
+            renderTeamInputs();
+            rebuildScorecard();
+            saveData();
+        }
+
+        // Remove a team
+        function removeTeam(teamId) {
+            if (teams.length <= 1) {
+                alert('You must have at least one team!');
+                return;
             }
+
+            if (confirm('Are you sure you want to remove this team? All their scores will be lost.')) {
+                teams = teams.filter(t => t.id !== teamId);
+                renderTeamInputs();
+                rebuildScorecard();
+                saveData();
+            }
+        }
+
+        // Update a team name
+        function updateTeamName(teamId) {
+            const input = document.getElementById(`team${teamId}Name`);
+            const team = teams.find(t => t.id === teamId);
+            if (team && input) {
+                team.name = input.value || `Team ${teamId}`;
+                updateTeamLabels();
+                saveData();
+            }
+        }
+
+        // Initialize the scorecard
+        function initializeScorecard() {
+            renderTeamInputs();
+            rebuildScorecard();
 
             // Try to load saved data, otherwise update totals
             if (!loadData()) {
@@ -477,29 +559,44 @@
             }
         }
 
+        // Rebuild all hands and totals
+        function rebuildScorecard() {
+            const container = document.getElementById('handsContainer');
+            container.innerHTML = '';
+
+            for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                container.appendChild(createHandSection(hand));
+            }
+
+            renderGrandTotals();
+            updateAllTotals();
+        }
+
         // Create a hand section
         function createHandSection(handNum) {
             const section = document.createElement('div');
             section.className = 'hand-section';
+
+            const teamCards = teams.map(team => createTeamCard(handNum, team.id, team.name)).join('');
+            const goneOutOptions = teams.map(team =>
+                `<option value="${team.id}">${team.name}</option>`
+            ).join('');
+
             section.innerHTML = `
                 <div class="hand-header">
                     <span>Hand ${handNum}</span>
-                    <span class="hand-total" id="handTotal${handNum}">Total: 0 / 0 / 0</span>
+                    <span class="hand-total" id="handTotal${handNum}"></span>
                 </div>
                 <div class="hand-body">
                     <div class="teams-container">
-                        ${createTeamCard(handNum, 1)}
-                        ${createTeamCard(handNum, 2)}
-                        ${createTeamCard(handNum, 3)}
+                        ${teamCards}
                     </div>
 
                     <div class="gone-out-section">
                         <label for="goneOut${handNum}">🏆 Team Gone Out First:</label>
                         <select id="goneOut${handNum}" onchange="updateHandTotal(${handNum})">
                             <option value="">None</option>
-                            <option value="1">Team 1</option>
-                            <option value="2">Team 2</option>
-                            <option value="3">Team 3</option>
+                            ${goneOutOptions}
                         </select>
                     </div>
                 </div>
@@ -508,15 +605,15 @@
         }
 
         // Create a team card for a hand
-        function createTeamCard(hand, team) {
+        function createTeamCard(hand, teamId, teamName) {
             return `
                 <div class="team-card">
-                    <div class="team-card-header" id="header${team}-${hand}">Team ${team}</div>
+                    <div class="team-card-header" id="header${teamId}-${hand}">${teamName}</div>
 
                     <div class="score-row">
                         <div class="score-label">7's Books</div>
                         <input type="number"
-                               id="hand${hand}_sevens_${team}"
+                               id="hand${hand}_sevens_${teamId}"
                                class="score-input"
                                value="0"
                                min="0"
@@ -526,7 +623,7 @@
                     <div class="score-row">
                         <div class="score-label">5's Books</div>
                         <input type="number"
-                               id="hand${hand}_fives_${team}"
+                               id="hand${hand}_fives_${teamId}"
                                class="score-input"
                                value="0"
                                min="0"
@@ -536,7 +633,7 @@
                     <div class="score-row">
                         <div class="score-label">Wilds Books</div>
                         <input type="number"
-                               id="hand${hand}_wilds_${team}"
+                               id="hand${hand}_wilds_${teamId}"
                                class="score-input"
                                value="0"
                                min="0"
@@ -546,7 +643,7 @@
                     <div class="score-row">
                         <div class="score-label">Clean Books</div>
                         <input type="number"
-                               id="hand${hand}_clean_${team}"
+                               id="hand${hand}_clean_${teamId}"
                                class="score-input"
                                value="0"
                                min="0"
@@ -556,7 +653,7 @@
                     <div class="score-row">
                         <div class="score-label">Dirty Books</div>
                         <input type="number"
-                               id="hand${hand}_dirty_${team}"
+                               id="hand${hand}_dirty_${teamId}"
                                class="score-input"
                                value="0"
                                min="0"
@@ -566,7 +663,7 @@
                     <div class="score-row">
                         <div class="score-label">Card Points</div>
                         <input type="number"
-                               id="hand${hand}_cardPoints_${team}"
+                               id="hand${hand}_cardPoints_${teamId}"
                                class="score-input points"
                                value="0"
                                min="0"
@@ -576,14 +673,14 @@
                     <div class="score-row">
                         <div class="score-label">Card Deductions</div>
                         <input type="number"
-                               id="hand${hand}_deductions_${team}"
+                               id="hand${hand}_deductions_${teamId}"
                                class="score-input points"
                                value="0"
                                min="0"
                                oninput="updateHandTotal(${hand})">
                     </div>
 
-                    <div class="team-total-display" id="teamTotal${hand}_${team}">Total: 0</div>
+                    <div class="team-total-display" id="teamTotal${hand}_${teamId}">Total: 0</div>
                 </div>
             `;
         }
@@ -616,82 +713,102 @@
 
         // Update totals for a specific hand
         function updateHandTotal(hand) {
-            const teams = [1, 2, 3];
-            const totals = [0, 0, 0];
+            const totals = {};
 
-            teams.forEach((team, idx) => {
+            teams.forEach(team => {
+                let total = 0;
+
                 // Calculate booking points
-                totals[idx] += calculateBookingPoints(hand, 'sevens', team);
-                totals[idx] += calculateBookingPoints(hand, 'fives', team);
-                totals[idx] += calculateBookingPoints(hand, 'wilds', team);
-                totals[idx] += calculateBookingPoints(hand, 'clean', team);
-                totals[idx] += calculateBookingPoints(hand, 'dirty', team);
+                total += calculateBookingPoints(hand, 'sevens', team.id);
+                total += calculateBookingPoints(hand, 'fives', team.id);
+                total += calculateBookingPoints(hand, 'wilds', team.id);
+                total += calculateBookingPoints(hand, 'clean', team.id);
+                total += calculateBookingPoints(hand, 'dirty', team.id);
 
                 // Add card points
-                const cardPoints = parseInt(document.getElementById(`hand${hand}_cardPoints_${team}`).value) || 0;
-                totals[idx] += cardPoints;
+                const cardPoints = parseInt(document.getElementById(`hand${hand}_cardPoints_${team.id}`)?.value) || 0;
+                total += cardPoints;
 
                 // Subtract deductions
-                const deductions = parseInt(document.getElementById(`hand${hand}_deductions_${team}`).value) || 0;
-                totals[idx] -= deductions;
+                const deductions = parseInt(document.getElementById(`hand${hand}_deductions_${team.id}`)?.value) || 0;
+                total -= deductions;
 
                 // Add first out bonus
-                const goneOut = document.getElementById(`goneOut${hand}`).value;
-                if (goneOut == team) {
-                    totals[idx] += POINTS.FIRST_OUT;
+                const goneOut = document.getElementById(`goneOut${hand}`)?.value;
+                if (goneOut == team.id) {
+                    total += POINTS.FIRST_OUT;
                 }
 
+                totals[team.id] = total;
+
                 // Update individual team total display in card
-                const teamTotalElem = document.getElementById(`teamTotal${hand}_${team}`);
+                const teamTotalElem = document.getElementById(`teamTotal${hand}_${team.id}`);
                 if (teamTotalElem) {
-                    teamTotalElem.textContent = `Total: ${totals[idx].toLocaleString()}`;
+                    teamTotalElem.textContent = `Total: ${total.toLocaleString()}`;
                 }
             });
 
             // Update hand total display
-            document.getElementById(`handTotal${hand}`).textContent =
-                `Total: ${totals[0].toLocaleString()} / ${totals[1].toLocaleString()} / ${totals[2].toLocaleString()}`;
+            const handTotalElem = document.getElementById(`handTotal${hand}`);
+            if (handTotalElem) {
+                const totalText = teams.map(team => totals[team.id].toLocaleString()).join(' / ');
+                handTotalElem.textContent = `Total: ${totalText}`;
+            }
 
             updateGrandTotals();
             saveData();
         }
 
+        // Render grand totals section
+        function renderGrandTotals() {
+            const container = document.getElementById('grandTotalsContainer');
+            container.innerHTML = teams.map(team => `
+                <div class="team-total">
+                    <h3 id="totalTeam${team.id}Name">${team.name}</h3>
+                    <div class="score" id="grandTotal${team.id}">0</div>
+                </div>
+            `).join('');
+        }
+
         // Update grand totals
         function updateGrandTotals() {
-            const grandTotals = [0, 0, 0];
+            const grandTotals = {};
 
-            for (let hand = 1; hand <= NUM_HANDS; hand++) {
-                for (let team = 1; team <= 3; team++) {
+            teams.forEach(team => {
+                grandTotals[team.id] = 0;
+
+                for (let hand = 1; hand <= NUM_HANDS; hand++) {
                     let handTotal = 0;
 
                     // Calculate booking points
-                    handTotal += calculateBookingPoints(hand, 'sevens', team);
-                    handTotal += calculateBookingPoints(hand, 'fives', team);
-                    handTotal += calculateBookingPoints(hand, 'wilds', team);
-                    handTotal += calculateBookingPoints(hand, 'clean', team);
-                    handTotal += calculateBookingPoints(hand, 'dirty', team);
+                    handTotal += calculateBookingPoints(hand, 'sevens', team.id);
+                    handTotal += calculateBookingPoints(hand, 'fives', team.id);
+                    handTotal += calculateBookingPoints(hand, 'wilds', team.id);
+                    handTotal += calculateBookingPoints(hand, 'clean', team.id);
+                    handTotal += calculateBookingPoints(hand, 'dirty', team.id);
 
                     // Add card points
-                    const cardPoints = parseInt(document.getElementById(`hand${hand}_cardPoints_${team}`).value) || 0;
+                    const cardPoints = parseInt(document.getElementById(`hand${hand}_cardPoints_${team.id}`)?.value) || 0;
                     handTotal += cardPoints;
 
                     // Subtract deductions
-                    const deductions = parseInt(document.getElementById(`hand${hand}_deductions_${team}`).value) || 0;
+                    const deductions = parseInt(document.getElementById(`hand${hand}_deductions_${team.id}`)?.value) || 0;
                     handTotal -= deductions;
 
                     // Add first out bonus
-                    const goneOut = document.getElementById(`goneOut${hand}`).value;
-                    if (goneOut == team) {
+                    const goneOut = document.getElementById(`goneOut${hand}`)?.value;
+                    if (goneOut == team.id) {
                         handTotal += POINTS.FIRST_OUT;
                     }
 
-                    grandTotals[team - 1] += handTotal;
+                    grandTotals[team.id] += handTotal;
                 }
-            }
 
-            document.getElementById('grandTotal1').textContent = grandTotals[0].toLocaleString();
-            document.getElementById('grandTotal2').textContent = grandTotals[1].toLocaleString();
-            document.getElementById('grandTotal3').textContent = grandTotals[2].toLocaleString();
+                const totalElem = document.getElementById(`grandTotal${team.id}`);
+                if (totalElem) {
+                    totalElem.textContent = grandTotals[team.id].toLocaleString();
+                }
+            });
         }
 
         // Update all totals
@@ -705,49 +822,47 @@
         function resetScorecard() {
             if (confirm('Are you sure you want to reset the entire scorecard? This cannot be undone.')) {
                 localStorage.removeItem(STORAGE_KEY);
-                document.getElementById('team1Name').value = 'Team 1';
-                document.getElementById('team2Name').value = 'Team 2';
-                document.getElementById('team3Name').value = 'Team 3';
+                teams = [
+                    { id: 1, name: 'Team 1' },
+                    { id: 2, name: 'Team 2' },
+                    { id: 3, name: 'Team 3' }
+                ];
+                nextTeamId = 4;
                 initializeScorecard();
             }
         }
 
-        // Update team names
-        function updateTeamNames() {
-            const team1 = document.getElementById('team1Name').value || 'Team 1';
-            const team2 = document.getElementById('team2Name').value || 'Team 2';
-            const team3 = document.getElementById('team3Name').value || 'Team 3';
+        // Update team labels across all sections
+        function updateTeamLabels() {
+            teams.forEach(team => {
+                // Update headers in hands
+                for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                    const headerElem = document.getElementById(`header${team.id}-${hand}`);
+                    if (headerElem) {
+                        headerElem.textContent = team.name;
+                    }
 
-            teamNames = [team1, team2, team3];
+                    // Update gone out options
+                    const select = document.getElementById(`goneOut${hand}`);
+                    if (select) {
+                        const option = Array.from(select.options).find(opt => opt.value == team.id);
+                        if (option) {
+                            option.text = team.name;
+                        }
+                    }
+                }
 
-            // Update headers
-            for (let hand = 1; hand <= NUM_HANDS; hand++) {
-                document.getElementById(`header1-${hand}`).textContent = team1;
-                document.getElementById(`header2-${hand}`).textContent = team2;
-                document.getElementById(`header3-${hand}`).textContent = team3;
-
-                // Update gone out options
-                const select = document.getElementById(`goneOut${hand}`);
-                select.options[1].text = team1;
-                select.options[2].text = team2;
-                select.options[3].text = team3;
-            }
-
-            // Update total headers
-            document.getElementById('totalTeam1Name').textContent = team1;
-            document.getElementById('totalTeam2Name').textContent = team2;
-            document.getElementById('totalTeam3Name').textContent = team3;
-
-            saveData();
+                // Update total headers
+                const totalNameElem = document.getElementById(`totalTeam${team.id}Name`);
+                if (totalNameElem) {
+                    totalNameElem.textContent = team.name;
+                }
+            });
         }
 
-        // Event listeners for team name changes
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             initializeScorecard();
-
-            document.getElementById('team1Name').addEventListener('input', updateTeamNames);
-            document.getElementById('team2Name').addEventListener('input', updateTeamNames);
-            document.getElementById('team3Name').addEventListener('input', updateTeamNames);
         });
     </script>
 </body>
