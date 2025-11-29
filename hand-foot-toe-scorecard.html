@@ -711,7 +711,10 @@
             BOOK_OF_SEVENS: 5000,
             BOOK_OF_FIVES: 3000,
             BOOK_OF_WILDS: 2500,
-            FIRST_OUT: 200
+            FIRST_OUT: 200,
+            RED_THREE_IN_BOOK: 100,
+            RED_THREE_IN_HAND: -500,
+            BLACK_THREE_IN_HAND: -100
         };
 
         const NUM_HANDS = 4;
@@ -738,7 +741,7 @@
                 data.hands[hand] = {};
 
                 teams.forEach(team => {
-                    const categories = ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'cardPoints', 'deductions'];
+                    const categories = ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'redThreesInBooks', 'redThreesInHand', 'blackThreesInHand', 'cardPoints', 'deductions'];
                     data.hands[hand][team.id] = {};
 
                     categories.forEach(category => {
@@ -777,7 +780,7 @@
 
                         teams.forEach(team => {
                             if (handData[team.id]) {
-                                const categories = ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'cardPoints', 'deductions'];
+                                const categories = ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'redThreesInBooks', 'redThreesInHand', 'blackThreesInHand', 'cardPoints', 'deductions'];
                                 categories.forEach(category => {
                                     const elem = document.getElementById(`hand${hand}_${category}_${team.id}`);
                                     if (elem && handData[team.id][category] !== undefined) {
@@ -978,11 +981,17 @@
                 <div class="team-card">
                     <div class="team-card-header" id="header${teamId}-${hand}">${teamName}</div>
 
-                    ${createBookRow("7's Books", 'sevens', '7 of each rank (7-7-7-7-7-7-7) • 5,000 points')}
-                    ${createBookRow("5's Books", 'fives', '5 of each rank (5-5-5-5-5-5-5) • 3,000 points')}
+                    ${createBookRow("7's Books", 'sevens', 'Book of seven 7's • 5,000 points')}
+                    ${createBookRow("5's Books", 'fives', 'Book of seven 5's • 3,000 points')}
                     ${createBookRow("Wilds Books", 'wilds', '7 wild cards (Jokers or 2s) • 2,500 points')}
                     ${createBookRow("Clean Books", 'clean', '7 natural cards (no wilds) • 500 points')}
                     ${createBookRow("Dirty Books", 'dirty', '7 cards with wilds • 300 points')}
+
+                    <div class="card-separator"></div>
+
+                    ${createBookRow("Red 3's in Books", 'redThreesInBooks', 'Red 3s played in books • +100 points each')}
+                    ${createBookRow("Red 3's in Hand", 'redThreesInHand', 'Red 3s left in hand • -500 points each')}
+                    ${createBookRow("Black 3's in Hand", 'blackThreesInHand', 'Black 3s left in hand • -100 points each')}
 
                     <div class="card-separator"></div>
 
@@ -1034,7 +1043,7 @@
 
         // Calculate points for a specific booking type
         function calculateBookingPoints(hand, type, team) {
-            const count = parseInt(document.getElementById(`hand${hand}_${type}_${team}`).value) || 0;
+            const count = parseInt(document.getElementById(`hand${hand}_${type}_${team}`)?.value) || 0;
             let points = 0;
 
             switch(type) {
@@ -1052,6 +1061,15 @@
                     break;
                 case 'dirty':
                     points = count * POINTS.DIRTY_BOOK;
+                    break;
+                case 'redThreesInBooks':
+                    points = count * POINTS.RED_THREE_IN_BOOK;
+                    break;
+                case 'redThreesInHand':
+                    points = count * POINTS.RED_THREE_IN_HAND;
+                    break;
+                case 'blackThreesInHand':
+                    points = count * POINTS.BLACK_THREE_IN_HAND;
                     break;
             }
 
@@ -1071,6 +1089,11 @@
                 total += calculateBookingPoints(hand, 'wilds', team.id);
                 total += calculateBookingPoints(hand, 'clean', team.id);
                 total += calculateBookingPoints(hand, 'dirty', team.id);
+
+                // Calculate Red and Black 3's points
+                total += calculateBookingPoints(hand, 'redThreesInBooks', team.id);
+                total += calculateBookingPoints(hand, 'redThreesInHand', team.id);
+                total += calculateBookingPoints(hand, 'blackThreesInHand', team.id);
 
                 // Add card points
                 const cardPoints = parseInt(document.getElementById(`hand${hand}_cardPoints_${team.id}`)?.value) || 0;
@@ -1121,6 +1144,11 @@
                     handTotal += calculateBookingPoints(hand, 'wilds', team.id);
                     handTotal += calculateBookingPoints(hand, 'clean', team.id);
                     handTotal += calculateBookingPoints(hand, 'dirty', team.id);
+
+                    // Calculate Red and Black 3's points
+                    handTotal += calculateBookingPoints(hand, 'redThreesInBooks', team.id);
+                    handTotal += calculateBookingPoints(hand, 'redThreesInHand', team.id);
+                    handTotal += calculateBookingPoints(hand, 'blackThreesInHand', team.id);
 
                     // Add card points
                     const cardPoints = parseInt(document.getElementById(`hand${hand}_cardPoints_${team.id}`)?.value) || 0;
