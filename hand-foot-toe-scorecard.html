@@ -728,50 +728,69 @@
 
         // Save data to localStorage
         function saveData() {
-            const data = {
-                teams: teams.map(team => ({
-                    id: team.id,
-                    name: document.getElementById(`team${team.id}Name`)?.value || team.name
-                })),
-                hands: {}
-            };
+            try {
+                const data = {
+                    teams: teams.map(team => ({
+                        id: team.id,
+                        name: document.getElementById(`team${team.id}Name`)?.value || team.name
+                    })),
+                    hands: {}
+                };
 
-            // Save all hand data
-            for (let hand = 1; hand <= NUM_HANDS; hand++) {
-                data.hands[hand] = {};
+                // Save all hand data
+                for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                    data.hands[hand] = {};
 
-                teams.forEach(team => {
-                    const categories = ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'redThreesInBooks', 'redThreesInHand', 'blackThreesInHand', 'cardPoints', 'deductions'];
-                    data.hands[hand][team.id] = {};
+                    teams.forEach(team => {
+                        const categories = ['sevens', 'fives', 'wilds', 'clean', 'dirty', 'redThreesInBooks', 'redThreesInHand', 'blackThreesInHand', 'cardPoints', 'deductions'];
+                        data.hands[hand][team.id] = {};
 
-                    categories.forEach(category => {
-                        const elem = document.getElementById(`hand${hand}_${category}_${team.id}`);
-                        data.hands[hand][team.id][category] = elem?.value || '0';
+                        categories.forEach(category => {
+                            const elem = document.getElementById(`hand${hand}_${category}_${team.id}`);
+                            data.hands[hand][team.id][category] = elem?.value || '0';
+                        });
                     });
-                });
 
-                data.hands[hand].goneOut = document.getElementById(`goneOut${hand}`)?.value || '';
+                    data.hands[hand].goneOut = document.getElementById(`goneOut${hand}`)?.value || '';
+                }
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                console.log('Data saved to localStorage:', data);
+            } catch (e) {
+                console.error('Error saving data:', e);
             }
-
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
         // Load data from localStorage
         function loadData() {
             const savedData = localStorage.getItem(STORAGE_KEY);
-            if (!savedData) return false;
+            console.log('Loading from localStorage:', savedData);
+
+            if (!savedData) {
+                console.log('No saved data found');
+                return false;
+            }
 
             try {
                 const data = JSON.parse(savedData);
+                console.log('Parsed data:', data);
 
                 // Restore teams
                 if (data.teams && data.teams.length > 0) {
                     teams = data.teams;
                     nextTeamId = Math.max(...teams.map(t => t.id)) + 1;
+                    console.log('Restored teams:', teams);
                 }
 
                 // Render team inputs
                 renderTeamInputs();
+
+                // Rebuild scorecard with correct teams
+                const container = document.getElementById('handsContainer');
+                container.innerHTML = '';
+                for (let hand = 1; hand <= NUM_HANDS; hand++) {
+                    container.appendChild(createHandSection(hand));
+                }
 
                 // Restore all hand data
                 for (let hand = 1; hand <= NUM_HANDS; hand++) {
@@ -799,6 +818,7 @@
                 }
 
                 updateAllTotals();
+                console.log('Data loaded successfully');
                 return true;
             } catch (e) {
                 console.error('Error loading saved data:', e);
@@ -866,11 +886,13 @@
 
         // Initialize the scorecard
         function initializeScorecard() {
-            renderTeamInputs();
-            rebuildScorecard();
+            // Try to load saved data first
+            const dataLoaded = loadData();
 
-            // Try to load saved data, otherwise update totals
-            if (!loadData()) {
+            // If no saved data, build from defaults
+            if (!dataLoaded) {
+                renderTeamInputs();
+                rebuildScorecard();
                 updateAllTotals();
             }
         }
