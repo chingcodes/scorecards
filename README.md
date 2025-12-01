@@ -7,6 +7,13 @@
 ## Available Scorecards
 
 - **Hand, Foot & Toe** - Track scores for the Hand, Foot & Toe card game with support for multiple teams, 4-hand scoring system, and automatic calculations.
+
+## Development
+
+### AI Disclosure
+
+This project was developed with assistance from Claude (Anthropic's AI assistant) for code generation, refactoring, and documentation. All code has been reviewed and tested by human maintainers.
+
 ## Attributions
 
 ### Icons
