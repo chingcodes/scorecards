@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Score Cards</title>
+    <title>Open-Scorecard</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Open-source scorecards for card games - Track your game scores offline">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Open-Scorecard">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
     <style>
         * {
             margin: 0;
@@ -48,6 +63,16 @@
             padding: 40px 30px;
         }
 
+        .content h2 {
+            margin-bottom: 10px;
+        }
+
+        .content > p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
         .scorecards {
             display: grid;
             gap: 20px;
@@ -62,6 +87,7 @@
             color: white;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
 
         .scorecard-card:hover {
@@ -94,28 +120,86 @@
         .footer a:hover {
             text-decoration: underline;
         }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>HTML Score Cards</h1>
-            <p>A collection of digital scorecards for card games</p>
+            <h1>📊 Open-Scorecard</h1>
+            <p>Open-source scorecards for card games</p>
         </div>
 
         <div class="content">
             <h2>Available Scorecards</h2>
-            <div class="scorecards">
-                <a href="hand-foot-toe-scorecard.html" class="scorecard-card">
-                    <h2>Hand, Foot & Toe Scorecard</h2>
-                    <p>Track scores for the Hand, Foot & Toe card game with an easy-to-use digital scorecard.</p>
-                </a>
+            <p>Choose a scorecard to start tracking your game:</p>
+            <div class="scorecards" id="scorecardsContainer">
+                <!-- Scorecards will be dynamically loaded here -->
             </div>
         </div>
 
         <div class="footer">
-            <p>Open source project - <a href="https://github.com/chingcodes/html-scorecards" target="_blank">View on GitHub</a></p>
+            <p>Open source project - <a href="https://github.com/chingcodes/scorecards" target="_blank">View on GitHub</a></p>
         </div>
     </div>
+
+    <!-- Scorecard Registry -->
+    <script>
+        // Scorecard registry - Add new scorecards here
+        const scorecards = [
+            {
+                name: 'Hand, Foot & Toe',
+                description: 'Track scores for the Hand, Foot & Toe card game with an easy-to-use digital scorecard. Supports multiple teams, 4-hand scoring system, and automatic calculations.',
+                path: 'scorecards/hand-foot-toe.html',
+                icon: '🃏'
+            }
+            // Add more scorecards here as they are created
+            // Example:
+            // {
+            //     name: 'Poker',
+            //     description: 'Keep track of poker game scores and chip counts.',
+            //     path: 'scorecards/poker.html',
+            //     icon: '♠️'
+            // }
+        ];
+
+        // Dynamically generate scorecard cards
+        function loadScorecards() {
+            const container = document.getElementById('scorecardsContainer');
+
+            if (scorecards.length === 0) {
+                container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No scorecards available yet. Check back soon!</p>';
+                return;
+            }
+
+            scorecards.forEach(scorecard => {
+                const card = document.createElement('a');
+                card.href = scorecard.path;
+                card.className = 'scorecard-card';
+
+                card.innerHTML = `
+                    <h2>${scorecard.icon} ${scorecard.name}</h2>
+                    <p>${scorecard.description}</p>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Load scorecards on page load
+        document.addEventListener('DOMContentLoaded', loadScorecards);
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script src="shared/pwa.js"></script>
 </body>
 </html>
