@@ -1,11 +1,12 @@
-const CACHE_NAME = 'open-scorecard-v1';
+const CACHE_NAME = 'open-scorecard-v2';
 const urlsToCache = [
   '/scorecards/',
   '/scorecards/index.html',
   '/scorecards/manifest.json',
   '/scorecards/shared/common.css',
   '/scorecards/shared/pwa.js',
-  '/scorecards/scorecards/hand-foot-toe.html'
+  '/scorecards/scorecards/hand-foot-toe.html',
+  '/scorecards/scorecards/pinochle-racehorse.html'
 ];
 
 // Install event - cache resources
