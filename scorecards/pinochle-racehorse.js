@@ -63,10 +63,13 @@ function initializeScorecard() {
 // ---- Controls Bar (simplified) ----
 function renderControls() {
     var bar = document.getElementById('controlsBar');
-    var wakeLockClass = wakeLockActive ? 'btn-wake-lock-active' : '';
+    var checkedAttr = wakeLockActive ? ' checked' : '';
     bar.innerHTML = '<button class="btn btn-game" onclick="showGameDialog()">Game</button>'
         + '<button class="btn btn-rules" onclick="openRulesOverlay()">Rules</button>'
-        + '<button class="btn btn-wake-lock ' + wakeLockClass + '" onclick="toggleWakeLock()" title="Keep screen awake">&#128269;</button>';
+        + '<label class="wake-lock-toggle" id="wakeLockToggle">'
+        + '<input type="checkbox"' + checkedAttr + ' onchange="toggleWakeLock()">'
+        + '<span class="toggle-label">Keep Screen Awake</span>'
+        + '</label>';
 }
 
 // ---- Game Settings Dialog ----
