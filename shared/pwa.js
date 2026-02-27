@@ -3,8 +3,6 @@
 
 // Install prompt handling
 let deferredPrompt;
-const INSTALL_DISMISSED_KEY = 'pwa-install-dismissed';
-const INSTALL_ACCEPTED_KEY = 'pwa-install-accepted';
 
 function isMobileDevice() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -84,13 +82,14 @@ function triggerInstallPrompt() {
         deferredPrompt.userChoice.then((choiceResult) => {
             if (choiceResult.outcome === 'accepted') {
                 console.log('[PWA] User accepted the install prompt');
-                localStorage.setItem(INSTALL_ACCEPTED_KEY, 'true');
+            } else {
+                console.log('[PWA] User dismissed the install prompt');
             }
             deferredPrompt = null;
             updateInstallLink();
         });
     } else {
-        // Fallback for iOS or browsers without beforeinstallprompt
+        // Fallback for browsers without beforeinstallprompt (Firefox, Safari)
         showIOSInstructions();
     }
 }
@@ -110,23 +109,16 @@ function updateInstallLink() {
         return;
     }
 
-    // Hide if already installed
-    if (localStorage.getItem(INSTALL_ACCEPTED_KEY) === 'true') {
-        console.log('[PWA] Hiding link - already installed');
+    // Hide if already running as installed PWA (standalone mode)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) {
+        console.log('[PWA] Hiding link - running in standalone mode (already installed)');
         installLink.style.display = 'none';
         if (separator) separator.style.display = 'none';
         return;
     }
 
-    // Hide if already in standalone mode
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-        console.log('[PWA] Hiding link - in standalone mode');
-        installLink.style.display = 'none';
-        if (separator) separator.style.display = 'none';
-        return;
-    }
-
-    // Show if we have the deferred prompt or on iOS
+    // Show on mobile devices or if browser supports install prompt
     const hasDeferredPrompt = !!deferredPrompt;
     const isMobile = isMobileDevice();
     console.log('[PWA] hasDeferredPrompt:', hasDeferredPrompt, 'isMobile:', isMobile);
@@ -136,7 +128,7 @@ function updateInstallLink() {
         installLink.style.display = 'inline';
         if (separator) separator.style.display = 'inline';
     } else {
-        console.log('[PWA] Not showing link - conditions not met');
+        console.log('[PWA] Not showing link - not mobile and no install prompt available');
     }
 }
 
@@ -156,11 +148,10 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 // Detect if app was successfully installed
 window.addEventListener('appinstalled', () => {
-    console.log('[PWA] App was installed');
-    localStorage.setItem(INSTALL_ACCEPTED_KEY, 'true');
+    console.log('[PWA] App was installed successfully');
     deferredPrompt = null;
 
-    // Update install link visibility
+    // Update install link visibility (will hide since we're now in standalone mode)
     updateInstallLink();
 });
 
