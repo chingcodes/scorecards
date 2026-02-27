@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOUR_GAME_NAME Scorecard</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="A scorecard app for tracking YOUR_GAME_NAME scores">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="../manifest.json">
+
+    <!-- Apple PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Open-Scorecard">
+    <link rel="apple-touch-icon" href="../icons/icon-192x192.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="../icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="../icons/icon-512x512.png">
+
+    <!-- Shared Styles -->
+    <link rel="stylesheet" href="../shared/common.css">
+    <style>
+        /* Scorecard-specific styles */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* Add your custom styles here */
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .score-table th,
+        .score-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .score-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html" class="back-home">Home</a>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 YOUR_GAME_NAME Scorecard</h1>
+            <p>Track your game scores with ease</p>
+        </div>
+
+        <div class="content">
+            <!-- Add your scorecard UI here -->
+            <h2>Scorecard</h2>
+
+            <table class="score-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="scoreTableBody">
+                    <!-- Scores will be added here -->
+                </tbody>
+            </table>
+
+            <div style="margin-top: 20px;">
+                <button onclick="addPlayer()">Add Player</button>
+                <button onclick="resetScores()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Your scorecard logic here
+
+        // Example: Load data from localStorage
+        function loadScores() {
+            const saved = localStorage.getItem('YOUR_GAME_NAME_scores');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            return [];
+        }
+
+        // Example: Save data to localStorage
+        function saveScores(scores) {
+            localStorage.setItem('YOUR_GAME_NAME_scores', JSON.stringify(scores));
+        }
+
+        // Example: Add player
+        function addPlayer() {
+            const name = prompt('Enter player name:');
+            if (name) {
+                const scores = loadScores();
+                scores.push({ name, score: 0 });
+                saveScores(scores);
+                renderScores();
+            }
+        }
+
+        // Example: Reset scores
+        function resetScores() {
+            if (confirm('Are you sure you want to reset all scores?')) {
+                localStorage.removeItem('YOUR_GAME_NAME_scores');
+                renderScores();
+            }
+        }
+
+        // Example: Render scores to table
+        function renderScores() {
+            const scores = loadScores();
+            const tbody = document.getElementById('scoreTableBody');
+
+            if (scores.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" style="text-align: center; color: #999;">No players yet. Click "Add Player" to start.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = scores.map((player, index) => `
+                <tr>
+                    <td>${player.name}</td>
+                    <td>${player.score}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            renderScores();
+        });
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script src="../shared/pwa.js"></script>
+</body>
+</html>
