@@ -14,6 +14,9 @@ let bidDialogHandIdx = null;
 let bidSelectedPlayer = null;
 let bidSelectedSuit = null;
 
+let wakeLock = null;
+let wakeLockActive = false;
+
 const SUITS = {
     hearts:   { symbol: '\u2665', cls: 'suit-red' },
     diamonds: { symbol: '\u2666', cls: 'suit-red' },
@@ -60,8 +63,10 @@ function initializeScorecard() {
 // ---- Controls Bar (simplified) ----
 function renderControls() {
     var bar = document.getElementById('controlsBar');
+    var wakeLockClass = wakeLockActive ? 'btn-wake-lock-active' : '';
     bar.innerHTML = '<button class="btn btn-game" onclick="showGameDialog()">Game</button>'
-        + '<button class="btn btn-rules" onclick="openRulesOverlay()">Rules</button>';
+        + '<button class="btn btn-rules" onclick="openRulesOverlay()">Rules</button>'
+        + '<button class="btn btn-wake-lock ' + wakeLockClass + '" onclick="toggleWakeLock()" title="Keep screen awake">&#128269;</button>';
 }
 
 // ---- Game Settings Dialog ----
@@ -297,7 +302,7 @@ function buildFinalizedRow(hIdx, hand) {
         var effectiveMeld = noTricks ? 0 : meld;
         var isSet = isBidder && (effectiveMeld + tricks) < hand.bid;
 
-        var mtClass = noTricks ? 'cell-mt struck' : 'cell-mt';
+        var meldClass = noTricks ? 'cell-meld struck' : 'cell-meld';
         var hsClass = isSet ? 'cell-hs set-text' : 'cell-hs';
 
         html += '<td>';
@@ -305,11 +310,9 @@ function buildFinalizedRow(hIdx, hand) {
         if (isBidder) {
             html += buildBidLabel(hIdx, hand) + '<br>';
         }
-        // Stacked: line 1 = meld|tricks, line 2 = handScore / total
-        html += '<div class="' + mtClass + '">' + meld + '|' + tricks + '</div>';
-        html += '<div><span class="' + hsClass + '">' + score + '</span>';
-        html += '<span class="cell-sep">/</span>';
-        html += '<span class="cell-ts">' + total.toLocaleString() + '</span></div>';
+        // Stacked: line 1 = meld + counters = handScore, line 2 = total
+        html += '<div class="' + meldClass + '">' + meld + ' + ' + tricks + ' = <span class="' + hsClass + '">' + score + '</span></div>';
+        html += '<div class="cell-ts">' + total.toLocaleString() + '</div>';
         html += '</td>';
     }
 
@@ -344,13 +347,13 @@ function buildCurrentRow(hIdx, hand) {
 
         // Meld input
         html += '<div class="input-row">';
-        html += '<span class="input-label">M</span>';
+        html += '<span class="input-label">Meld</span>';
         html += buildNumInput(hIdx, 'meld', p, hand.meld[p]);
         html += '</div>';
 
         // Tricks input
         html += '<div class="input-row">';
-        html += '<span class="input-label">T</span>';
+        html += '<span class="input-label">Counters</span>';
         html += buildNumInput(hIdx, 'tricks', p, hand.tricks[p]);
         html += '</div>';
 
@@ -370,7 +373,7 @@ function buildBidLabel(hIdx, hand) {
         badgeClass = 'bid-badge ' + (SUITS[hand.suit].cls === 'suit-red' ? 'bid-badge-red' : 'bid-badge-black');
     }
     return '<span class="' + badgeClass + '" onclick="event.stopPropagation();showBidDialog(' + hIdx + ')" title="Edit bid">'
-        + suitHtml + hand.bid + '</span>';
+        + 'Bid ' + suitHtml + hand.bid + '</span>';
 }
 
 function buildNumInput(handIdx, field, playerIdx, value) {
@@ -634,6 +637,39 @@ function escHtml(str) {
 
 function escAttr(str) {
     return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ---- Screen Wake Lock ----
+async function toggleWakeLock() {
+    if (!navigator.wakeLock) {
+        alert('Screen Wake Lock is not supported in this browser.');
+        return;
+    }
+
+    try {
+        if (wakeLockActive) {
+            if (wakeLock) {
+                await wakeLock.release();
+                wakeLock = null;
+            }
+            wakeLockActive = false;
+        } else {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLockActive = true;
+
+            // Re-acquire wake lock if page becomes visible again
+            document.addEventListener('visibilitychange', async function handleVisibilityChange() {
+                if (wakeLockActive && document.visibilityState === 'visible') {
+                    try {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                    } catch (e) {}
+                }
+            });
+        }
+        renderControls();
+    } catch (e) {
+        console.error('Failed to toggle wake lock:', e);
+    }
 }
 
 // ---- Keyboard handler for overlays ----

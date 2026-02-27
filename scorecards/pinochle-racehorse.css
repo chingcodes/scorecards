@@ -76,6 +76,21 @@
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+.btn-wake-lock {
+    background: #ffc107;
+    color: #333;
+    display: none;
+}
+
+.btn-wake-lock:hover {
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.4);
+}
+
+.btn-wake-lock-active {
+    background: #28a745;
+    color: white;
+}
+
 .reset-btn {
     background: #dc3545;
     color: white;
@@ -167,19 +182,14 @@
 }
 
 /* Cell content in finalized rows */
-.cell-mt {
+.cell-meld {
     color: #666;
     font-size: 0.9em;
 }
 
-.cell-mt.struck {
+.cell-meld.struck {
     text-decoration: line-through;
     color: #bbb;
-}
-
-.cell-sep {
-    color: #ccc;
-    margin: 0 3px;
 }
 
 .cell-hs {
@@ -227,7 +237,7 @@
 }
 
 .input-row .input-label {
-    width: 14px;
+    width: 60px;
     font-weight: 600;
     color: #888;
     text-align: right;
@@ -703,6 +713,9 @@
     .dialog { padding: 20px; width: 95%; }
     .player-select-grid { grid-template-columns: 1fr 1fr; }
     .rules-print-btn { display: none; }
+    .btn-wake-lock { display: block; }
+    .input-row .input-label { width: 55px; font-size: 0.8em; }
+    .score-input { width: 38px; height: 26px; font-size: 0.9em; }
 }
 
 /* Print: show only rules content */
@@ -710,6 +723,9 @@
     body {
         background: white;
         padding: 0;
+    }
+    .back-home {
+        display: none !important;
     }
     .container,
     .overlay,
