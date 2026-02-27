@@ -102,10 +102,17 @@ window.triggerInstallPrompt = triggerInstallPrompt;
 function updateInstallLink() {
     const installLink = document.getElementById('pwa-install-link');
     const separator = document.getElementById('pwa-install-separator');
-    if (!installLink) return;
+
+    console.log('[PWA] updateInstallLink called');
+
+    if (!installLink) {
+        console.log('[PWA] Install link element not found');
+        return;
+    }
 
     // Hide if already installed
     if (localStorage.getItem(INSTALL_ACCEPTED_KEY) === 'true') {
+        console.log('[PWA] Hiding link - already installed');
         installLink.style.display = 'none';
         if (separator) separator.style.display = 'none';
         return;
@@ -113,15 +120,23 @@ function updateInstallLink() {
 
     // Hide if already in standalone mode
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+        console.log('[PWA] Hiding link - in standalone mode');
         installLink.style.display = 'none';
         if (separator) separator.style.display = 'none';
         return;
     }
 
     // Show if we have the deferred prompt or on iOS
+    const hasDeferredPrompt = !!deferredPrompt;
+    const isMobile = isMobileDevice();
+    console.log('[PWA] hasDeferredPrompt:', hasDeferredPrompt, 'isMobile:', isMobile);
+
     if (deferredPrompt || isMobileDevice()) {
+        console.log('[PWA] Showing install link');
         installLink.style.display = 'inline';
         if (separator) separator.style.display = 'inline';
+    } else {
+        console.log('[PWA] Not showing link - conditions not met');
     }
 }
 
@@ -154,7 +169,7 @@ window.addEventListener('load', () => {
     updateInstallLink();
 });
 
-export function showUpdateBanner() {
+function showUpdateBanner() {
     // Create simple update notification banner
     const banner = document.createElement('div');
     banner.id = 'pwa-update-banner';
@@ -195,7 +210,7 @@ export function showUpdateBanner() {
     }, 3000);
 }
 
-export function getServiceWorkerPath() {
+function getServiceWorkerPath() {
     return window.location.pathname.includes('/scorecards/scorecards/')
         ? '../sw.js'
         : 'sw.js';

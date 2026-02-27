@@ -1,4 +1,4 @@
-const CACHE_NAME = 'open-scorecard-v4';
+const CACHE_NAME = 'open-scorecard-v6';
 const urlsToCache = [
   '/scorecards/',
   '/scorecards/index.html',
